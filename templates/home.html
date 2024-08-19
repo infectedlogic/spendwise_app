@@ -50,6 +50,8 @@
             <div id="barChartYear" class="chart-container"></div>
             <h2>All Time Purchases <span>since {{ oldest_entry_date }}</span></h2>
             <div id="barChartAllTime" class="chart-container"></div>
+            <h2>Monthly Total Purchases</h2> <!-- New heading for the monthly chart -->
+            <div id="barChartMonthly" class="chart-container"></div> <!-- Updated chart container for the bar chart -->
         </div>
     </main>
     <script>
@@ -61,6 +63,7 @@
             const statsMonth = {{ stats_month | tojson }};
             const statsYear = {{ stats_year | tojson }};
             const statsAllTime = {{ stats_all_time | tojson }};
+            const monthlyTotals = {{ monthly_totals | tojson }}; // Monthly totals data
 
             const labels = Object.keys(statsToday);
 
@@ -90,9 +93,10 @@
                         textStyle: { fontSize: 12 },
                         titleTextStyle: { fontSize: 14 }
                     },
-                    legend: { position: 'none' }
+                    height: 400,
+                    colors: ['#1b9e77', '#d95f02', '#7570b3'],
+                    isStacked: true
                 };
-
                 const chart = new google.visualization.BarChart(document.getElementById(elementId));
                 chart.draw(data, options);
             };
@@ -101,21 +105,54 @@
             drawChart('barChartMonth', statsMonth);
             drawChart('barChartYear', statsYear);
             drawChart('barChartAllTime', statsAllTime);
+
+            // Draw the monthly totals bar chart
+            const drawBarChart = (elementId, stats) => {
+                const data = new google.visualization.DataTable();
+                data.addColumn('string', 'Month');
+                data.addColumn('number', 'Total Amount');
+                Object.keys(stats).forEach(month => {
+                    data.addRow([month, stats[month]]);
+                });
+
+                const options = {
+                    chart: {
+                        title: 'Total Purchases by Month',
+                    },
+                    bars: 'vertical',
+                    vAxis: {
+                        title: 'Total Amount',
+                        textStyle: { fontSize: 12 },
+                        titleTextStyle: { fontSize: 14 }
+                    },
+                    hAxis: {
+                        title: 'Month',
+                        textStyle: { fontSize: 12 },
+                        titleTextStyle: { fontSize: 14 }
+                    },
+                    height: 400,
+                    colors: ['#1b9e77'],
+                    legend: { position: 'none' }
+                };
+
+                const chart = new google.visualization.ColumnChart(document.getElementById(elementId));
+                chart.draw(data, options);
+            };
+
+            drawBarChart('barChartMonthly', monthlyTotals);
         }
 
+        // Function to update the current time and date
         function updateTime() {
             const now = new Date();
-            const time = now.toLocaleTimeString();
-            document.getElementById('currentTime').textContent = time;
+            const timeString = now.toLocaleTimeString();
+            const dateString = now.toLocaleDateString();
+
+            document.getElementById('currentTime').textContent = timeString;
+            document.getElementById('currentDate').textContent = dateString;
         }
 
-        function updateDate() {
-            const now = new Date();
-            const date = now.toLocaleDateString();
-            document.getElementById('currentDate').textContent = date;
-        }
-
-        updateDate();
+        // Update time every second
         setInterval(updateTime, 1000);
     </script>
 </body>

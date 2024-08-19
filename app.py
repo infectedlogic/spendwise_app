@@ -52,6 +52,15 @@ def index():
     oldest_entry = Purchase.query.filter_by(owner=user).order_by(Purchase.date.asc()).first()
     oldest_entry_date = oldest_entry.date if oldest_entry else None
 
+    # Calculate the total sum of all purchases for each month
+    purchases_by_month = db.session.query(
+        db.func.strftime('%Y-%m', Purchase.date).label('month'),
+        db.func.sum(Purchase.price).label('total')
+    ).filter_by(owner=user).group_by('month').order_by('month').all()
+
+    # Format the monthly totals for Google Charts
+    monthly_totals = {month: total for month, total in purchases_by_month}
+
     if request.method == 'POST':
         if 'clear_today' in request.form:
             # Clear all today's purchases
@@ -84,7 +93,8 @@ def index():
         total_all_time=total_all_time,
         current_month=current_month,
         current_year=current_year,
-        oldest_entry_date=oldest_entry_date
+        oldest_entry_date=oldest_entry_date,
+        monthly_totals=monthly_totals  # Pass monthly totals to the template
     )
 
 @app.route('/login', methods=['GET', 'POST'])
