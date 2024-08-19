@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Purchase</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Add a New Purchase</h1>
+        <form method="post">
+            <input type="text" name="name" placeholder="Purchase Name" required>
+            <input type="number" name="price" placeholder="Price in TND" step="0.01" required>
+            <select name="type" required>
+                <option value="food & necessities">Food & Necessities</option>
+                <option value="waste">Waste</option>
+                <option value="transport">Transport</option>
+                <option value="rent & bills">Rent & Bills</option>
+                <option value="mobile credits">Mobile Credits</option>
+                <option value="hygiene">Hygiene</option>
+                <option value="extra">Extra</option>
+                <option value="sada9a">Sada9a</option>
+                <option value="gym">Gym</option>
+                <option value="electronics">Electronics</option>
+                <option value="meds">Meds</option>
+                <option value="education">Education</option>
+                <option value="docs">Docs</option>
+                <option value="meuble">Meuble</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="commissions">Commissions</option>
+            </select>
+            <input type="password" name="password" placeholder="Your Password" required>
+            <button type="submit">Add Purchase</button>
+        </form>
+        <a href="{{ url_for('home') }}">Back to Home</a>
+    </div>
+</body>
+</html>

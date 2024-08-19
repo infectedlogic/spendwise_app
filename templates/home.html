@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spendwise</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Spendwise</h1>
+        <nav>
+            <button onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
+        </nav>
+    </header>
+    <main>
+        <div class="add-purchase">
+            <h2>Add a New Purchase</h2>
+            <form method="post">
+                <input type="text" name="name" placeholder="Purchase Name" required>
+                <input type="number" name="price" placeholder="Price in TND" step="0.01" required>
+                <select name="type" required>
+                    <option value="food & necessities">Food & Necessities</option>
+                    <option value="hygiene">Hygiene</option>
+                    <option value="rent & bills">Rent & Bills</option>
+                    <option value="gym">Gym</option>
+                    <option value="sada9a">Sada9a</option>
+                    <option value="meds">Meds</option>
+                    <option value="transport">Transport</option>
+                    <option value="mobile credits">Mobile Credits</option>
+                    <option value="education">Education</option>
+                    <option value="textile">Textile</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="extra">Extra</option>
+                    <option value="docs">Docs</option>
+                    <option value="meuble">Meuble</option>
+                    <option value="waste">Waste</option>
+                </select>
+                <button type="submit" name="add_purchase">Confirm</button>
+            </form>
+        </div>
+
+        <div id="charts-container">
+            <h2>Today's Purchases <span id="currentDate"></span> <span id="currentTime"></span></h2>
+            <div id="barChartToday" class="chart-container"></div>
+            <h2>This Month's Purchases <span>{{ current_month }}</span></h2>
+            <div id="barChartMonth" class="chart-container"></div>
+            <h2>This Year's Purchases <span>{{ current_year }}</span></h2>
+            <div id="barChartYear" class="chart-container"></div>
+            <h2>All Time Purchases <span>since {{ oldest_entry_date }}</span></h2>
+            <div id="barChartAllTime" class="chart-container"></div>
+        </div>
+    </main>
+    <script>
+        google.charts.load('current', {packages: ['corechart', 'bar']});
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+            const statsToday = {{ stats_today | tojson }};
+            const statsMonth = {{ stats_month | tojson }};
+            const statsYear = {{ stats_year | tojson }};
+            const statsAllTime = {{ stats_all_time | tojson }};
+
+            const labels = Object.keys(statsToday);
+
+            const drawChart = (elementId, stats) => {
+                const data = new google.visualization.DataTable();
+                data.addColumn('string', 'Category');
+                data.addColumn('number', 'Amount');
+                labels.forEach(label => {
+                    data.addRow([label, stats[label]]);
+                });
+                const totalAmount = labels.reduce((total, label) => total + stats[label], 0);
+                data.addRow(['Total', totalAmount]);
+
+                const options = {
+                    chart: {
+                        title: 'Purchases',
+                        subtitle: 'Amount in TND',
+                    },
+                    bars: 'horizontal',
+                    hAxis: {
+                        title: 'Amount',
+                        textStyle: { fontSize: 12 },
+                        titleTextStyle: { fontSize: 14 }
+                    },
+                    vAxis: {
+                        title: 'Category',
+                        textStyle: { fontSize: 12 },
+                        titleTextStyle: { fontSize: 14 }
+                    },
+                    legend: { position: 'none' }
+                };
+
+                const chart = new google.visualization.BarChart(document.getElementById(elementId));
+                chart.draw(data, options);
+            };
+
+            drawChart('barChartToday', statsToday);
+            drawChart('barChartMonth', statsMonth);
+            drawChart('barChartYear', statsYear);
+            drawChart('barChartAllTime', statsAllTime);
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString();
+            document.getElementById('currentTime').textContent = time;
+        }
+
+        function updateDate() {
+            const now = new Date();
+            const date = now.toLocaleDateString();
+            document.getElementById('currentDate').textContent = date;
+        }
+
+        updateDate();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
